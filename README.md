@@ -41,15 +41,15 @@ you can read the game rules in this link [Othello Rules](https://www.worldothell
 Here is an example of how the board is displayed:
 
 ```css
-    a b c d e f g h
-    1 . . . . . . . .
-    2 . . . . . . . .
-    3 . . . * . . . .
-    4 . . * ○ ● . . .
-    5 . . . ● ○ * . .
-    6 . . . . * . . .
-    7 . . . . . . . .
-    8 . . . . . . . .
+       a b c d e f g h
+    1| . . . . . . . .
+    2| . . . . . . . .
+    3| . . . * . . . .
+    4| . . * ○ ● . . .
+    5| . . . ● ○ * . .
+    6| . . . . * . . .
+    7| . . . . . . . .
+    8| . . . . . . . .
     -------------------
     Current Player: ●
     ● : 2 | ○ : 2

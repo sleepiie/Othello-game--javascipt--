@@ -10,9 +10,9 @@ let currentPlayer = '●';
 
 function printBoard(board ,currentPlayer ) {
     const { black, white } = calculateScore(board);
-    console.log('  a b c d e f g h');
+    console.log('   a b c d e f g h');
     for (let i = 0; i < 8; i++) {
-        let row = `${i + 1} `;
+        let row = `${i + 1}| `;
         for(let j =0; j<8;j++){
             if(board[i][j] === null){
                 if (isValidMove(board,i,j,currentPlayer)){
@@ -129,8 +129,31 @@ function calculateScore(board) {
     }
     return { black, white };
 }
-function askForMove(){
-    while(true){
+function askForMove() {
+    while (true) {
+        if (!hasValidMoves(board, currentPlayer) && !hasValidMoves(board, switchPlayer(currentPlayer))) {
+            console.clear();
+            printBoard(board, currentPlayer);
+            console.log('Game Over');
+            const { black, white } = calculateScore(board);
+            if (black > white) {
+                console.log('Player ● wins');
+            } else if (white > black) {
+                console.log('Player ○ wins');
+            } else {
+                console.log('Tie');
+            }
+            return;
+        }
+
+        if (!hasValidMoves(board, currentPlayer)) {
+            currentPlayer = switchPlayer(currentPlayer);
+            console.clear();
+            printBoard(board, currentPlayer);
+            console.log(`No valid moves for ${currentPlayer}. Skipping turn.`);
+            continue;
+        }
+
         const move = readline.question(`Player ${currentPlayer}, enter your move (e.g., d3): `);
         if (!/^[a-h][1-8]$/.test(move)) {
             console.log('Invalid input format. Please enter a letter (a-h) followed by a number (1-8).');
@@ -138,32 +161,14 @@ function askForMove(){
         }
         const col = move.charCodeAt(0) - 'a'.charCodeAt(0);
         const row = parseInt(move[1]) - 1;
-        if (placePiece(board,row,col,currentPlayer)){
+        if (placePiece(board, row, col, currentPlayer)) {
             currentPlayer = switchPlayer(currentPlayer);
-            if(!hasValidMoves(board,currentPlayer)){
-                currentPlayer = switchPlayer(currentPlayer);
-                if(!hasValidMoves(board,currentPlayer)){
-                    console.log('Game Over');
-                    const { black, white } = calculateScore(board);
-                    if(black>white){
-                        console.log('● wins');
-                    }
-                    else if(black<white){
-                        console.log('○ wins');
-                    }
-                    else{
-                        console.log('Draw');
-                    }
-                }
-            }
             console.clear();
-            printBoard(board,currentPlayer);
-        }
-        else{
+            printBoard(board, currentPlayer);
+        } else {
             console.log('Invalid move. Try again.');
         }
     }
-    
 }
 
 printBoard(board,currentPlayer);
