@@ -56,7 +56,7 @@ Here is an example of how the board is displayed:
     -------------------
     Player ●, enter your move (e.g., d3):
 ```
-
+## Thank you
 Thank you for see my repository. I hope you have a nice day.
 
 
