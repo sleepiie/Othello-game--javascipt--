@@ -55,4 +55,8 @@ Here is an example of how the board is displayed:
     ● : 2 | ○ : 2
     -------------------
     Player ●, enter your move (e.g., d3):
+```
+
+## Thank you for see my repository. I hope you have a nice day.
+
 
