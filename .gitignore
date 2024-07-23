@@ -32,3 +32,9 @@ build/
 #lock file
 package-lock.json
 yarn.lock
+
+#test files
+test.js
+
+#ignore the .gitignore file
+.gitignore
