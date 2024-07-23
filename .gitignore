@@ -36,5 +36,3 @@ yarn.lock
 #test files
 test.js
 
-#ignore the .gitignore file
-.gitignore
