@@ -207,7 +207,6 @@ class Game {
                 } else {
                     const botMove = player2.bestMove(this.board);
                     this.board.placePiece(botMove);
-                    console.log(`Bot placed a piece at ${String.fromCharCode(botMove[1] + 97)}${botMove[0] + 1}`);
                 }
             }
             
