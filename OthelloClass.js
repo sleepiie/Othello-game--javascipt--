@@ -8,26 +8,21 @@ class Board {
         this.board[4][3] = '●';
         this.board[4][4] = '○';
         this.currentPlayer = '●';
-        this.players = [];
+        this.player = ''; // 'Player' or 'bot'
     }
-    
+
     printBoard() {
-        const { black, white } = this.calculateScore();
-        console.log('----------------------');
-        console.log(`|  play with ${this.players[0]}  |`);
-        console.log('----------------------\n');
+        const { black, white } = this.calculateScore(this.board);
         console.log('   a b c d e f g h');
         for (let i = 0; i < 8; i++) {
             let row = `${i + 1}| `;
             for (let j = 0; j < 8; j++) {
-                if (this.board[i][j] === null) {
-                    if (this.isValidMove(i, j)) {
-                        row += '* ';
-                    } else {
-                        row += '. ';
-                    }
-                } else {
+                if (this.board[i][j]) {
                     row += this.board[i][j] + ' ';
+                } else if (this.isValidMove([i, j])) {
+                    row += '* ';
+                } else {
+                    row += '. ';
                 }
             }
             console.log(row);
@@ -37,24 +32,18 @@ class Board {
         console.log(`● : ${black} | ○ : ${white}`);
         console.log('-------------------');
     }
-    
+
     switchPlayer() {
-        if (this.currentPlayer === '●') {
-            this.currentPlayer = '○';
-        }
-        else {
-            this.currentPlayer = '●';
-        }
+        this.currentPlayer = this.currentPlayer === '●' ? '○' : '●';
     }
-    
-    isValidMove(row, col) {
+
+    isValidMove([row, col]) {
         if (this.board[row][col] !== null) return false;
 
-        let opponent = this.currentPlayer === '●' ? '○' : '●';
+        const opponent = this.currentPlayer === '●' ? '○' : '●';
         const directions = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]];
-        let valid = false;
 
-        directions.forEach(([dRow, dCol]) => {
+        return directions.some(([dRow, dCol]) => {
             let x = row + dRow;
             let y = col + dCol;
             let foundOpponent = false;
@@ -63,21 +52,15 @@ class Board {
                 y += dCol;
                 foundOpponent = true;
             }
-            if (foundOpponent && x >= 0 && x < 8 && y >= 0 && y < 8 && this.board[x][y] === this.currentPlayer) {
-                valid = true;
-            }
+            return foundOpponent && x >= 0 && x < 8 && y >= 0 && y < 8 && this.board[x][y] === this.currentPlayer;
         });
-
-        return valid;
     }
-    
-    placePiece(row, col) {
-        if (!this.isValidMove(row, col)) {
-            return false;
-        }
-        this.board[row][col] = this.currentPlayer;
 
-        let opponent = this.currentPlayer === '●' ? '○' : '●';
+    placePiece([row, col]) {
+        if (!this.isValidMove([row, col])) return false;
+
+        this.board[row][col] = this.currentPlayer;
+        const opponent = this.currentPlayer === '●' ? '○' : '●';
         const directions = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]];
 
         directions.forEach(([dRow, dCol]) => {
@@ -100,65 +83,54 @@ class Board {
         this.switchPlayer();
         return true;
     }
-    
+
     hasValidMoves() {
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
-                if (this.isValidMove(row, col)) {
+                if (this.isValidMove([row, col])) {
                     return true;
                 }
             }
         }
         return false;
     }
-    
+
     calculateScore() {
-        let black = 0;
-        let white = 0;
-        for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-                if (this.board[i][j] === '●') {
-                    black++;
-                } else if (this.board[i][j] === '○') {
-                    white++;
-                }
+        let black = 0, white = 0;
+        for (let row = 0; row < 8; row++) {
+            for (let col = 0; col < 8; col++) {
+                if (this.board[row][col] === '●') black++;
+                else if (this.board[row][col] === '○') white++;
             }
         }
         return { black, white };
     }
-    
+
     gameOver() {
         const { black, white } = this.calculateScore();
-        console.clear();
-        this.printBoard();
         console.log('Game Over');
-        if (black > white) {
-            console.log('Player ● wins');
-        } else if (white > black) {
-            console.log('Player ○ wins');
-        } else {
-            console.log('Tie');
-        }
+        console.log(`Black: ${black} | White: ${white}`);
+        if (black > white) console.log('Black wins!');
+        else if (white > black) console.log('White wins!');
+        else console.log('It\'s a tie!');
     }
 }
 
 class Player {
-    constructor(piece) {
-        this.piece = piece;
+    constructor(playerPiece) {
+        this.playerPiece = playerPiece;
     }
-    
+
     playerInput(board) {
         while (true) {
             const move = readline.question(`Player ${board.currentPlayer}, enter your move (e.g., d3): `);
             if (!/^[a-h][1-8]$/.test(move)) {
-                console.log('Invalid input format. Please enter a letter (a-h) followed by a number (1-8).');
+                console.log('Invalid input. Please enter a letter (a-h) followed by a number (1-8).');
                 continue;
             }
             const col = move.charCodeAt(0) - 'a'.charCodeAt(0);
             const row = parseInt(move[1]) - 1;
-            if (board.placePiece(row, col)) {
-                console.clear();
-                board.printBoard();
+            if (board.placePiece([row, col])) {
                 break;
             } else {
                 console.log('Invalid move. Please try again.');
@@ -166,62 +138,85 @@ class Player {
         }
     }
 }
-class Bot extends Player {
-    playerInput(board) {
-        let validMoves = [];
+
+class Bot {
+    constructor(botPiece) {
+        this.botPiece = botPiece;
+        this.difficulty = 'easy';
+        this.scoreBoard = [
+            [100, -20, 10,  5,  5, 10, -20, 100],
+            [-20, -50,  -2, -2, -2, -2, -50, -20],
+            [ 10,  -2,   1,  1,  1,  1,  -2,  10],
+            [  5,  -2,   1,  1,  1,  1,  -2,   5],
+            [  5,  -2,   1,  1,  1,  1,  -2,   5],
+            [ 10,  -2,   1,  1,  1,  1,  -2,  10],
+            [-20, -50,  -2, -2, -2, -2, -50, -20],
+            [100, -20, 10,  5,  5, 10, -20, 100]
+        ];
+    }
+
+    bestMove(board) {
+        const validMoves = [];
         for (let row = 0; row < 8; row++) {
             for (let col = 0; col < 8; col++) {
-                if (board.isValidMove(row, col)) {
-                    validMoves.push([row, col]);
+                if (board.isValidMove([row, col])) {
+                    validMoves.push({row, col, score: this.scoreBoard[row][col]});
                 }
             }
         }
 
-        if (validMoves.length > 0) {
-            const [row, col] = validMoves[Math.floor(Math.random() * validMoves.length)];
-            board.placePiece(row, col);
-            console.clear();
-            board.printBoard();
-        }
+        validMoves.sort((a, b) => b.score - a.score);
+
+        const topMoves = validMoves.slice(0, Math.min(5, validMoves.length));
+        const selectedMove = topMoves[Math.floor(Math.random() * topMoves.length)];
+
+        return [selectedMove.row, selectedMove.col];
     }
 }
 
 class Game {
     constructor() {
         this.board = new Board();
-        this.players = [];
     }
 
     selectMode() {
         console.log('Select Game Mode:');
         console.log('1. Player vs Player');
-        console.log('2. Player vs Bot');
+        console.log('2. Player vs Bot(Randome Move)');
         let mode = readline.question('Enter mode (1 or 2): ');
-
         while (mode !== '1' && mode !== '2') {
             console.log('Invalid selection. Please enter 1 or 2.');
             mode = readline.question('Enter mode (1 or 2): ');
         }
-
-        if (mode === '1') {
-            this.board.players = ['player'];
-            this.players = [new Player('●'), new Player('○')];
-        } else {
-            this.board.players = ['bot   ']; 
-            this.players = [new Player('●'), new Bot('○')];
-        }
+        this.board.player = mode === '1' ? 'Player' : 'bot';
     }
-    
+
     play() {
-        console.clear();
         this.selectMode();
+        const player1 = new Player('●');
+        const player2 = this.board.player === 'Player' ? new Player('○') : new Bot('○');
+
         while (true) {
             console.clear();
             this.board.printBoard();
-            this.players.find(player => player.piece === this.board.currentPlayer).playerInput(this.board);
-            if (!this.board.hasValidMoves() && !this.board.hasValidMoves(this.board.switchPlayer())) {
-                this.board.gameOver();
-                break;
+            if (this.board.currentPlayer === '●') {
+                player1.playerInput(this.board);
+            } else {
+                if (this.board.player === 'Player') {
+                    player2.playerInput(this.board);
+                } else {
+                    const botMove = player2.bestMove(this.board);
+                    this.board.placePiece(botMove);
+                    console.log(`Bot placed a piece at ${String.fromCharCode(botMove[1] + 97)}${botMove[0] + 1}`);
+                }
+            }
+            
+            if (!this.board.hasValidMoves()) {
+                this.board.switchPlayer();
+                if (!this.board.hasValidMoves()) {
+                    this.board.gameOver();
+                    break;
+                }
             }
         }
     }
